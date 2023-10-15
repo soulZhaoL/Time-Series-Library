@@ -91,7 +91,7 @@ class Exp_Classification(Exp_Basic):
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
-
+        print("train_epochs:{}", self.args.train_epochs)
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
