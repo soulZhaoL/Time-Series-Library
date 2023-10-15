@@ -5,7 +5,7 @@ model_name=TimesNet
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path /home/guojiawei/copy_Time-Series-Library/dataset/ETT-small/ \
   --data_path ETTh1.csv \
   --model_id ETTh1_96_96 \
   --model $model_name \
@@ -24,7 +24,7 @@ python -u run.py \
   --d_ff 32 \
   --des 'Exp' \
   --itr 1 \
-  --top_k 5
+  --top_k 5 
 
 
 python -u run.py \
