@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 model_name=TimesNet
 root_path=/root/autodl-tmp/dataset/electricity/
