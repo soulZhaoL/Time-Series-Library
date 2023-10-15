@@ -96,6 +96,8 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
+    print("torch.cuda.is_available:", torch.cuda.is_available())
+    print("args.use_gpu :", args.use_gpu)
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
     if args.use_gpu and args.use_multi_gpu:
