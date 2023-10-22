@@ -717,3 +717,85 @@ class UEAloader(Dataset):
 
     def __len__(self):
         return len(self.all_IDs)
+
+class UEA_CSV_loader(Dataset):
+    def __init__(self, root_path, file_list=None, limit_size=None, flag=None):
+        self.root_path = root_path
+        self.all_df, self.labels_df = self.load_all(root_path, file_list=file_list, flag=flag)
+        self.all_IDs = self.all_df.index.unique()  # all sample IDs (integer indices 0 ... num_samples-1)
+
+        if limit_size is not None:
+            if limit_size > 1:
+                limit_size = int(limit_size)
+            else:  # interpret as proportion if in (0, 1]
+                limit_size = int(limit_size * len(self.all_IDs))
+            self.all_IDs = self.all_IDs[:limit_size]
+            self.all_df = self.all_df.loc[self.all_IDs]
+
+        # use all features
+        self.feature_names = self.all_df.columns
+        self.feature_df = self.all_df
+
+        # pre_process
+        normalizer = Normalizer()
+        self.feature_df = normalizer.normalize(self.feature_df)
+        print(len(self.all_IDs))
+
+    def load_all(self, root_path, file_list=None, flag=None):
+        """
+        Loads datasets from csv files contained in `root_path` into a dataframe, optionally choosing from `pattern`
+        Args:
+            root_path: directory containing all individual .csv files
+            file_list: optionally, provide a list of file paths within `root_path` to consider.
+                Otherwise, entire `root_path` contents will be used.
+        Returns:
+            all_df: a single (possibly concatenated) dataframe with all data corresponding to specified files
+            labels_df: dataframe containing label(s) for each sample
+        """
+        # Select paths for training and evaluation
+        if file_list is None:
+            data_paths = glob.glob(os.path.join(root_path, '*.csv'))  # list of all paths
+        else:
+            data_paths = [os.path.join(root_path, p) for p in file_list]
+        if len(data_paths) == 0:
+            raise Exception('No files found using: {}'.format(os.path.join(root_path, '*.csv')))
+        if flag is not None:
+            data_paths = list(filter(lambda x: re.search(flag, x), data_paths))
+        input_paths = [p for p in data_paths if os.path.isfile(p) and p.endswith('.csv')]
+        if len(input_paths) == 0:
+            pattern = '*.csv'
+            raise Exception("No .csv files found using pattern: '{}'".format(pattern))
+
+        all_df, labels_df = self.load_single(input_paths[0])  # a single file contains dataset
+
+        return all_df, labels_df
+
+    def load_single(self, filepath):
+        df = pd.read_csv(filepath)
+
+        # Assuming the last column contains the labels
+        labels = df.iloc[:, -1].astype("category")
+        self.class_names = labels.cat.categories
+        labels_df = pd.DataFrame(labels.cat.codes, dtype=np.int8)
+
+        # Drop the label column to retain only the features
+        df.drop(df.columns[-1], axis=1, inplace=True)
+        self.max_seq_len = df.shape[1]
+        return df, labels_df
+
+    def instance_norm(self, case):
+        if self.root_path.count('EthanolConcentration') > 0:  # special process for numerical stability
+            mean = case.mean(0, keepdim=True)
+            case = case - mean
+            stdev = torch.sqrt(torch.var(case, dim=1, keepdim=True, unbiased=False) + 1e-5)
+            case /= stdev
+            return case
+        else:
+            return case
+
+    def __getitem__(self, ind):
+        return self.instance_norm(torch.from_numpy(self.feature_df.loc[self.all_IDs[ind]].values)), \
+               torch.from_numpy(self.labels_df.loc[self.all_IDs[ind]].values)
+
+    def __len__(self):
+        return len(self.all_IDs)
