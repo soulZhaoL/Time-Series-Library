@@ -56,6 +56,7 @@ def data_provider(args, flag):
         drop_last = False
         data_set = Data(
             root_path=args.root_path,
+            data_path=args.data_path,
             flag=flag,
         )
 
