@@ -5,7 +5,7 @@ root_path=/root/autodl-tmp/dataset
 
 #python -u run.py  --task_name classification  --is_training 1  --root_path $root_path/FaceDetection/         --model_id FaceDetection            --model TimesNet  --data UEA  --e_layers 3  --batch_size 16  --d_model 64  --d_ff 256  --top_k 3  --num_kernels 4  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 
-python -u run.py  --task_name classification --is_training 1 --root_path   ./dataset/Handwriting/           --model_id Handwriting              --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64   --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
+python -u run.py  --task_name classification --is_training 1 --root_path   $root_path/Handwriting/           --model_id Handwriting              --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64   --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
 #
 #python -u run.py  --task_name classification  --is_training 1  --root_path ./dataset/Heartbeat/             --model_id Heartbeat                --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 64  --d_ff 64  --top_k 1  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 #
