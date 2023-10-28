@@ -717,4 +717,3 @@ class UEAloader(Dataset):
 
     def __len__(self):
         return len(self.all_IDs)
-

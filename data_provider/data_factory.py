@@ -15,7 +15,7 @@ data_dict = {
     'SMAP': SMAPSegLoader,
     'SMD': SMDSegLoader,
     'SWAT': SWATSegLoader,
-    'UEA': UEAloader,
+    'UEA': UEAloader
 }
 
 
@@ -56,8 +56,6 @@ def data_provider(args, flag):
         drop_last = False
         data_set = Data(
             root_path=args.root_path,
-            data_path=args.data_path,
-            target=args.target,
             flag=flag,
         )
 

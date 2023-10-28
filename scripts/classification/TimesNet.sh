@@ -3,9 +3,9 @@ root_path=/root/autodl-tmp/dataset
 
 #python -u run.py  --task_name classification  --is_training 1  --root_path /root/autodl-tmp/dataset/EthanolConcentration/  --model_id EthanolConcentration     --model TimesNet  --data UEA  --e_layers 3  --batch_size 16  --d_model 32  --d_ff 32   --top_k 3  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 
-#python -u run.py  --task_name classification  --is_training 1  --root_path /root/autodl-tmp/dataset/FaceDetection/         --model_id FaceDetection            --model TimesNet  --data UEA  --e_layers 3  --batch_size 16  --d_model 64  --d_ff 256  --top_k 3  --num_kernels 4  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
+#python -u run.py  --task_name classification  --is_training 1  --root_path $root_path/FaceDetection/         --model_id FaceDetection            --model TimesNet  --data UEA  --e_layers 3  --batch_size 16  --d_model 64  --d_ff 256  --top_k 3  --num_kernels 4  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 
-#python -u run.py  --task_name classification --is_training 1 --root_path   ./dataset/Handwriting/           --model_id Handwriting              --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64   --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
+python -u run.py  --task_name classification --is_training 1 --root_path   ./dataset/Handwriting/           --model_id Handwriting              --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64   --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
 #
 #python -u run.py  --task_name classification  --is_training 1  --root_path ./dataset/Heartbeat/             --model_id Heartbeat                --model TimesNet  --data UEA  --e_layers 2  --batch_size 16  --d_model 64  --d_ff 64  --top_k 1  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 #
@@ -21,4 +21,4 @@ root_path=/root/autodl-tmp/dataset
 #
 #python -u run.py  --task_name classification  --is_training 1  --root_path ./dataset/UWaveGestureLibrary/   --model_id UWaveGestureLibrary       --model TimesNet --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64  --top_k 3  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 
-python -u run.py --task_name classification --is_training 1 --root_path $root_path/BTC/ --data_path BTC.csv --model_id BTC --model TimesNet --data custom --features MS --target label --e_layers 3 --batch_size 32 --d_model 32 --d_ff 32 --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
+python -u run.py --task_name classification --is_training 1 --root_path $root_path/BTC/  --model_id BTC --model TimesNet --data UEA --e_layers 3 --batch_size 32 --d_model 64 --d_ff 32 --top_k 5 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
