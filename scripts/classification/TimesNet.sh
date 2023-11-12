@@ -21,4 +21,5 @@ python -u run.py  --task_name classification --is_training 1 --root_path   $root
 #
 #python -u run.py  --task_name classification  --is_training 1  --root_path ./dataset/UWaveGestureLibrary/   --model_id UWaveGestureLibrary       --model TimesNet --data UEA  --e_layers 2  --batch_size 16  --d_model 32  --d_ff 64  --top_k 3  --des 'Exp'  --itr 1  --learning_rate 0.001  --train_epochs 30  --patience 10
 
-python -u run.py --task_name classification --is_training 1 --root_path $root_path/BTC/  --model_id BTC --model TimesNet --data UEA --e_layers 3 --batch_size 32 --d_model 64 --d_ff 32 --top_k 5 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
+#python -u run.py --task_name classification --is_training 1 --root_path $root_path/BTC/  --model_id BTC --model TimesNet --data UEA --e_layers 3 --batch_size 32 --d_model 64 --d_ff 32 --top_k 5 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10
+python -u run.py --task_name classification --is_training 1 --root_path $root_path/BTC/ --data_path BTC.csv --model_id BTC --model TimesNet --data BTC_CUSTOM --features MS --target label --seq_len 96 --label_len 43 --e_layers 3 --batch_size 16 --enc_in 42 --dec_in 42 --c_out 42 --d_model 32 --d_ff 32 --top_k 3 --des 'Exp' --itr 1 --learning_rate 0.001 --train_epochs 30 --patience 10 --num_workers 0

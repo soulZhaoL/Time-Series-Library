@@ -184,6 +184,7 @@ class Model(nn.Module):
         # embedding
         enc_out = self.enc_embedding(x_enc, None)  # [B,T,C]
         # TimesNet
+        # 模型通过每个TimesBlock层迭代处理数据，并在每次迭代后应用层归一化（LayerNorm），以稳定训练过程。
         for i in range(self.layer):
             enc_out = self.layer_norm(self.model[i](enc_out))
 
@@ -196,7 +197,7 @@ class Model(nn.Module):
         # (batch_size, seq_length * d_model)
         output = output.reshape(output.shape[0], -1)
         output = self.projection(output)  # (batch_size, num_classes)
-        return output
+        return output # 模型返回最终的分类结果，这是一个二维张量，其中每一行对应一个输入样本的类别预测。
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':

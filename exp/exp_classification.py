@@ -23,7 +23,7 @@ class Exp_Classification(Exp_Basic):
         test_data, test_loader = self._get_data(flag='TEST')
         self.args.seq_len = max(train_data.max_seq_len, test_data.max_seq_len)
         self.args.pred_len = 0
-        self.args.enc_in = train_data.feature_df.shape[1]
+        self.args.enc_in = self.args.enc_in
         self.args.num_class = len(train_data.class_names)
         # model init
         model = self.model_dict[self.args.model].Model(self.args).float()
@@ -100,13 +100,22 @@ class Exp_Classification(Exp_Basic):
             epoch_time = time.time()
 
             for i, (batch_x, label, padding_mask) in enumerate(train_loader):
+                """
+                batch_x : torch.float32
+                label ： torch.int8
+                padding_mask ： torch.bool
+                """
                 iter_count += 1
                 model_optim.zero_grad()
 
-                batch_x = batch_x.float().to(self.device)
+                batch_x = batch_x.to(self.device)
                 padding_mask = padding_mask.float().to(self.device)
                 label = label.to(self.device)
-
+                """
+                batch_x : torch.float32
+                padding_mask :torch.float32
+                label :torch.int8
+                """
                 outputs = self.model(batch_x, padding_mask, None, None)
                 loss = criterion(outputs, label.long().squeeze(-1))
                 train_loss.append(loss.item())

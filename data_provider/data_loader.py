@@ -77,7 +77,7 @@ class Dataset_ETT_hour(Dataset):
             data_stamp = df_stamp.drop(['date'], 1).values
         elif self.timeenc == 1:
             data_stamp = time_features(pd.to_datetime(df_stamp['date'].values), freq=self.freq)
-            data_stamp = data_stamp.transpose(1, 0) 
+            data_stamp = data_stamp.transpose(1, 0)
 
         self.data_x = data[border1:border2]
         self.data_y = data[border1:border2]
@@ -248,6 +248,7 @@ class Dataset_Custom(Dataset):
         elif self.features == 'S':
             df_data = df_raw[[self.target]]
 
+        # 对数据进行标准化（均值、标准差）
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
             self.scaler.fit(train_data.values)
@@ -614,7 +615,8 @@ class UEAloader(Dataset):
             (Moreover, script argument overrides this attribute)
     """
 
-    def __init__(self, root_path, file_list=None, limit_size=None, flag=None):
+    def __init__(self, root_path, features='S', data_path='ETTh1.csv',
+                 target='OT', file_list=None, limit_size=None, flag=None):
         self.root_path = root_path
         self.all_df, self.labels_df = self.load_all(root_path, file_list=file_list, flag=flag)
         self.all_IDs = self.all_df.index.unique()  # all sample IDs (integer indices 0 ... num_samples-1)
@@ -717,3 +719,132 @@ class UEAloader(Dataset):
 
     def __len__(self):
         return len(self.all_IDs)
+
+
+
+class BTC_CUSTOM(Dataset):
+    def __init__(self, root_path, flag='TRAIN', size=None,
+                 features='S', data_path='ETTh1.csv',
+                 target='OT', scale=True, timeenc=0, freq='h', seasonal_patterns=None):
+        # size [seq_len, label_len, pred_len]
+        # info
+        if size == None:
+            self.seq_len = 24 * 4 * 4
+            self.max_seq_len = 24 * 4 * 4
+            self.label_len = 24 * 4
+            # self.pred_len = 24 * 4
+        else:
+            self.seq_len = size[0]
+            self.max_seq_len = size[0]
+            self.label_len = size[1]
+            # self.pred_len = size[2]
+        # init
+        assert flag in ['TRAIN', 'TEST', 'VAL']
+        type_map = {'TRAIN': 0, 'VAL': 1, 'TEST': 2}
+        self.set_type = type_map[flag]
+
+        self.features = features
+        self.target = target
+        self.scale = scale
+        self.timeenc = timeenc
+        self.freq = freq
+
+        self.root_path = root_path
+        self.data_path = data_path
+        self.__read_data__()
+
+    def __read_data__(self):
+        self.scaler = StandardScaler()
+        df_raw = pd.read_csv(os.path.join(self.root_path,
+                                          self.data_path))
+
+        '''
+        df_raw.columns: ['date', ...(other features), target feature]
+        '''
+        # 确保标签列存在
+        if self.target in df_raw.columns:
+            # 将标签列转换为分类类型
+            labels = pd.Series(df_raw[self.target], dtype="category")
+
+            # 获取类别名称
+            self.class_names = labels.cat.categories
+
+            # 保存标签为整数索引
+            self.labels = labels.cat.codes.values
+        else:
+            raise ValueError(f"The specified label column '{self.target}' does not exist in the dataframe.")
+
+
+        cols = list(df_raw.columns)
+        cols.remove(self.target)
+        cols.remove('date')
+        df_raw = df_raw[['date'] + cols + [self.target]]
+        num_train = int(len(df_raw) * 0.7)
+        num_test = int(len(df_raw) * 0.2)
+        num_vali = len(df_raw) - num_train - num_test
+        # border1s = [训练集的起始索引0, 验证集的起始索引， 测试集的起始索引]
+        border1s = [0, num_train - self.seq_len, len(df_raw) - num_test - self.seq_len]
+        # border2s = [训练集的结束索引, 验证集的起始索引， 测试集的起始索引]
+        border2s = [num_train, num_train + num_vali, len(df_raw)]
+        border1 = border1s[self.set_type]
+        border2 = border2s[self.set_type]
+
+        features = df_raw.drop([self.target], axis=1)
+        if self.features == 'M' or self.features == 'MS':
+            cols_data = features.columns[1:]
+            df_data = df_raw[cols_data]
+        elif self.features == 'S':
+            df_data = df_raw[[self.target]]
+
+        # 对数据进行标准化（均值、标准差）
+        if self.scale:
+            train_data = df_data[border1s[0]:border2s[0]]
+            self.scaler.fit(train_data.values)
+            data = self.scaler.transform(df_data.values)
+        else:
+            data = df_data.values
+
+        self.labels = labels
+
+        df_stamp = df_raw[['date']][border1:border2]
+        df_stamp['date'] = pd.to_datetime(df_stamp.date)
+        if self.timeenc == 0:
+            df_stamp['month'] = df_stamp.date.apply(lambda row: row.month, 1)
+            df_stamp['day'] = df_stamp.date.apply(lambda row: row.day, 1)
+            df_stamp['weekday'] = df_stamp.date.apply(lambda row: row.weekday(), 1)
+            df_stamp['hour'] = df_stamp.date.apply(lambda row: row.hour, 1)
+            data_stamp = df_stamp.drop(['date'], 1).values
+        elif self.timeenc == 1:
+            data_stamp = time_features(pd.to_datetime(df_stamp['date'].values), freq=self.freq)
+            data_stamp = data_stamp.transpose(1, 0)
+
+        self.data_x = data[border1:border2]
+        self.data_y = self.labels
+        self.data_stamp = data_stamp
+
+    def __getitem__(self, index):
+        s_begin = index
+        s_end = s_begin + self.seq_len
+
+        seq_x = self.data_x[s_begin:s_end]
+        # 假设我们只对序列的最后一个时间步的标签感兴趣
+        seq_y = self.labels[s_end - 1]  # # 标签已经是整数索引
+
+        # 创建padding_mask，所有值初始化为1
+        padding_mask = np.ones((self.seq_len,), dtype=bool)
+
+        # 转换为 torch.Tensor
+        seq_x_tensor = torch.from_numpy(seq_x)
+        seq_y_tensor = torch.tensor(seq_y)
+        padding_mask_tensor = torch.from_numpy(padding_mask)
+
+        # 数据类型转换
+        batch_x = torch.tensor(seq_x, dtype=torch.float32)  # 确保 batch_x 是 float32 类型
+        label = torch.tensor(seq_y, dtype=torch.int8)  # 确保 label 是 int8 类型
+        padding_mask = torch.tensor(padding_mask, dtype=torch.bool)  # 确保 padding_mask 是 bool 类型
+
+        # 返回与 UEAloader 类似的结构
+        return batch_x, label, padding_mask
+
+    def __len__(self):
+        return len(self.data_x) - self.seq_len + 1
